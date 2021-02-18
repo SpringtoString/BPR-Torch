@@ -24,6 +24,7 @@ class Data(object):
         self.neg_pools = {}
 
         self.exist_users = []
+        self.train_items, self.test_set = {}, {}  # userid to itemset
 
         # 第一次遍历得到 n_users、n_items、n_train、n_test
         with open(train_file) as f:
@@ -37,47 +38,25 @@ class Data(object):
                     self.n_users = max(self.n_users, uid)
                     self.n_train += len(items)
 
+                    self.train_items[uid] = items
+
         with open(test_file) as f:
             for l in f.readlines():
                 if len(l) > 0:
-                    l = l.strip('\n')
                     try:
-                        items = [int(i) for i in l.split(' ')[1:]]
+                        l = l.strip('\n').split(' ')
+                        uid = int(l[0])
+                        items = [int(i) for i in l[1:]]
                     except Exception:
                         continue
                     self.n_items = max(self.n_items, max(items))
                     self.n_test += len(items)
+                    self.test_set[uid] = items
 
         self.n_items += 1 # user、item都是从0开始编号，所以要 +1
         self.n_users += 1
 
         self.print_statistics()
-
-
-        self.train_items, self.test_set = {}, {}   # userid to itemset
-
-        # 第二次遍历得到 userid to itemset 的映射，作为训练集、测试集
-        with open(train_file) as f_train:
-            with open(test_file) as f_test:
-                for l in f_train.readlines():
-                    if len(l) == 0:
-                        break
-                    l = l.strip('\n')
-                    items = [int(i) for i in l.split(' ')]
-                    uid, train_items = items[0], items[1:]
-
-                    self.train_items[uid] = train_items
-
-                for l in f_test.readlines():
-                    if len(l) == 0: break
-                    l = l.strip('\n')
-                    try:
-                        items = [int(i) for i in l.split(' ')]
-                    except Exception:
-                        continue
-
-                    uid, test_items = items[0], items[1:]
-                    self.test_set[uid] = test_items
 
     def sample(self,batch_size=256):
         '''
