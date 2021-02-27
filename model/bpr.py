@@ -217,23 +217,26 @@ class BPR(nn.Module):
                     total_emb_loss = total_emb_loss + reg_emb_loss.item()
                     total_loss = total_loss + loss.item()
 
-                epoch_time = time.time() - start_time
-                print('epoch %d %.2fs train loss is [%.4f = %.4f + %.4f] ' % (epoch, epoch_time,
-                            total_loss / n_batch, total_mf_loss/n_batch, total_emb_loss/n_batch))
+                if verbose > 0:
+                    epoch_time = time.time() - start_time
+                    print('epoch %d %.2fs train loss is [%.4f = %.4f + %.4f] ' % (epoch, epoch_time,
+                                total_loss / n_batch, total_mf_loss/n_batch, total_emb_loss/n_batch))
 
-            start_time = time.time()
-            result = self.test(batch_size=batch_size)
-            eval_time = time.time() - start_time
+            if verbose>0 and epoch%verbose==0:
+                start_time = time.time()
+                result = self.test(batch_size=batch_size)
+                eval_time = time.time() - start_time
 
-            print(
-                'epoch %d %.2fs test precision is [%.4f %.4f] recall is [%.4f %.4f] ndcg is [%.4f %.4f] hit_ratio is [%.4f %.4f] MAP is [%.4f %.4f] auc is %.4f ' %
-                (epoch, eval_time,
-                 result['precision'][0], result['precision'][-1],
-                 result['recall'][0], result['recall'][-1],
-                 result['ndcg'][0],result['ndcg'][-1],
-                 result['hit_ratio'][0],result['hit_ratio'][-1],
-                 result['MAP'][0], result['MAP'][-1],
-                 result['auc']))
+                print(
+                    'epoch %d %.2fs test precision is [%.4f %.4f] recall is [%.4f %.4f] ndcg is [%.4f %.4f] hit_ratio is [%.4f %.4f] MAP is [%.4f %.4f] auc is %.4f ' %
+                    (epoch, eval_time,
+                     result['precision'][0], result['precision'][-1],
+                     result['recall'][0], result['recall'][-1],
+                     result['ndcg'][0],result['ndcg'][-1],
+                     result['hit_ratio'][0],result['hit_ratio'][-1],
+                     result['MAP'][0], result['MAP'][-1],
+                     result['auc']))
+
             print(" ")
 
     def test(self, batch_size=256, ):
